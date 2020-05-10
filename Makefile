@@ -1,7 +1,7 @@
 EMACS ?= emacs
 CASK ?= cask
-ELS = phpstan.el flycheck-phpstan.el flymake-phpstan.el
-AUTOLOADS = phpstan-autoloads.el
+ELS = psalm.el flycheck-psalm.el flymake-psalm.el
+AUTOLOADS = psalm-autoloads.el
 ELCS = $(ELS:.el=.elc)
 
 .el.elc: .cask
@@ -23,7 +23,7 @@ $(AUTOLOADS): $(ELCS)
 	"(progn \
 	   (require 'package) \
 	   (normal-top-level-add-subdirs-to-load-path) \
-	   (package-generate-autoloads \"phpstan\" default-directory))"
+	   (package-generate-autoloads \"psalm\" default-directory))"
 
 clean:
 	-rm -f $(ELCS) $(AUTOLOADS)
