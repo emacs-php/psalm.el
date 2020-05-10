@@ -77,6 +77,13 @@
   :type 'boolean
   :group 'psalm)
 
+(defcustom psalm-docker-image nil
+  "Docker image name for execute Psalm command."
+  :type '(choice
+          (string :tag "DockerHub image name")
+          (const :tag "Unspecified" null))
+  :group 'psalm)
+
 ;;;###autoload
 (progn
   (defvar psalm-working-dir nil
@@ -263,9 +270,11 @@ it returns the value of `SOURCE' as it is."
   "Return Psalm excutable file and arguments."
   (cond
    ((eq 'docker psalm-executable)
-    (list "run" "--rm" "-v"
-          (concat (expand-file-name (php-project-get-root-dir)) ":/app")
-          "psalm/psalm"))
+    (if (null psalm-docker-image)
+        (user-error "Not specified psalm-docker-image to execute Psalm")
+      (list "run" "--rm" "-v"
+            (concat (expand-file-name (php-project-get-root-dir)) ":/app")
+            psalm-docker-image)))
    ((and (consp psalm-executable)
          (eq 'root (car psalm-executable)))
     (list
