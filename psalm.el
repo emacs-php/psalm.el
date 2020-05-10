@@ -67,7 +67,7 @@
   :link '(url-link :tag "psalm.el" "https://github.com/emacs-php/psalm.el"))
 
 (defcustom psalm-flycheck-auto-set-executable t
-  "Set flycheck psalm-executable automatically."
+  "Set flycheck `psalm-executable' automatically."
   :type 'boolean
   :group 'psalm)
 
