@@ -292,6 +292,7 @@ it returns the value of `SOURCE' as it is."
       (cond
        ((file-exists-p vendor-psalm) (list vendor-psalm))
        ((executable-find "psalm") (list (executable-find "psalm")))
+       ((executable-find "psalm.phar") (list (executable-find "psalm.phar")))
        (t (error "Psalm executable not found")))))))
 
 (defun psalm-get-command-args ()
