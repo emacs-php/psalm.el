@@ -44,8 +44,7 @@
 ;;     ((nil . ((php-project-root . git)
 ;;              (psalm-executable . docker)
 ;;              (psalm-working-dir . (root . "path/to/dir"))
-;;              (psalm-config-file . (root . "path/to/dir/psalm-docker.neon"))
-;;              (psalm-level . 7))))
+;;              (psalm-config-file . (root . "path/to/dir/psalm-docker.xml")))
 ;;
 ;; If you want to know the directory variable specification, please refer to
 ;; M-x info [Emacs > Customization > Variables] or the following web page.
@@ -126,45 +125,6 @@ NIL
 
 ;;;###autoload
 (progn
-  (defvar-local psalm-autoload-file nil
-    "Path to autoload file for Psalm.
-
-STRING
-     Path to `psalm' autoload file.
-
-`(root . STRING)'
-     Relative path to `psalm' configuration file from project root directory.
-
-NIL
-     If `psalm-enable-on-no-config-file', search \"vendor/autoload.php\" in (psalm-get-working-dir).")
-  (put 'psalm-autoload-file 'safe-local-variable
-       #'(lambda (v) (if (consp v)
-                         (and (eq 'root (car v)) (stringp (cdr v)))
-                       (null v) (stringp v)))))
-
-;;;###autoload
-(progn
-  (defvar-local psalm-level nil
-    "Rule level of Psalm.
-
-INTEGER or STRING
-     Number of Psalm rule level.
-
-max
-     The highest of Psalm rule level.
-
-NIL
-     Use rule level specified in `psalm' configuration file.")
-  (put 'psalm-level 'safe-local-variable
-       #'(lambda (v) (or (null v)
-                         (integerp v)
-                         (eq 'max v)
-                         (and (stringp v)
-                              (string= "max" v)
-                              (string-match-p "\\`[0-9]\\'" v))))))
-
-;;;###autoload
-(progn
   (defvar psalm-replace-path-prefix)
   (make-variable-buffer-local 'psalm-replace-path-prefix)
   (put 'psalm-replace-path-prefix 'safe-local-variable
@@ -211,7 +171,6 @@ NIL
   "Return non-NIL if Psalm configured or Composer detected."
   (and (not (file-remote-p default-directory)) ;; Not support remote filesystem
        (or (psalm-get-config-file)
-           (psalm-get-autoload-file)
            (and psalm-enable-on-no-config-file
                 (php-project-get-root-dir)))))
 
@@ -229,14 +188,6 @@ NIL
                  for dir  = (locate-dominating-file working-directory name)
                  if dir
                  return (expand-file-name name dir))))))
-
-(defun psalm-get-autoload-file ()
-  "Return path to autoload file or NIL."
-  (when psalm-autoload-file
-    (if (and (consp psalm-autoload-file)
-             (eq 'root (car psalm-autoload-file)))
-        (expand-file-name (cdr psalm-autoload-file) (php-project-get-root-dir))
-      psalm-autoload-file)))
 
 (defun psalm-normalize-path (source-original &optional source)
   "Return normalized source file path to pass by `SOURCE-ORIGINAL' OR `SOURCE'.
@@ -257,14 +208,6 @@ it returns the value of `SOURCE' as it is."
                                    source-original t t)
          prefix)
       (or source source-original))))
-
-(defun psalm-get-level ()
-  "Return path to psalm configure file or `NIL'."
-  (cond
-   ((null psalm-level) nil)
-   ((integerp psalm-level) (int-to-string psalm-level))
-   ((symbolp psalm-level) (symbol-name psalm-level))
-   (t psalm-level)))
 
 (defun psalm-get-executable ()
   "Return Psalm excutable file and arguments."
@@ -298,14 +241,10 @@ it returns the value of `SOURCE' as it is."
 (defun psalm-get-command-args ()
   "Return command line argument for Psalm."
   (let ((executable (psalm-get-executable))
-        (path (psalm-normalize-path (psalm-get-config-file)))
-        (autoload (psalm-get-autoload-file))
-        (level (psalm-get-level)))
+        (path (psalm-normalize-path (psalm-get-config-file))))
     (append executable
-            (list "analyze" "--error-format=raw" "--no-progress" "--no-interaction")
+            (list "--no-progress" "--output-format=emacs")
             (and path (list "-c" path))
-            (and autoload (list "-a" autoload))
-            (and level (list "-l" level))
             (list "--"))))
 
 (provide 'psalm)

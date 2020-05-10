@@ -69,7 +69,8 @@
   :working-directory (lambda (_) (psalm-get-working-dir))
   :enabled (lambda () (flycheck-psalm--enabled-and-set-variable))
   :error-patterns
-  ((error line-start (1+ (not (any ":"))) ":" line ":" (message) line-end))
+  ((warning line-start (message) ":" line ":" column ":warning - " (message) line-end)
+   (error line-start (message) ":" line ":" column ":error - " (message) line-end))
   :modes (php-mode phps-mode))
 
 (add-to-list 'flycheck-checkers 'psalm t)
