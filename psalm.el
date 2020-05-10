@@ -72,8 +72,8 @@
   :type 'boolean
   :group 'psalm)
 
-(defcustom psalm-enable-on-no-config-file t
-  "If T, activate configuration from composer even when `psalm.neon' is not found."
+(defcustom psalm-enable-on-no-config-file nil
+  "If T, activate configuration from composer even when `psalm.xml' is not found."
   :type 'boolean
   :group 'psalm)
 
@@ -117,7 +117,7 @@ STRING
      Relative path to `psalm' configuration file from project root directory.
 
 NIL
-     Search psalm.neon(.dist) in (psalm-get-working-dir).")
+     Search psalm.xml(.dist) in (psalm-get-working-dir).")
   (make-variable-buffer-local 'psalm-config-file)
   (put 'psalm-config-file 'safe-local-variable
        #'(lambda (v) (if (consp v)
@@ -225,7 +225,7 @@ NIL
         psalm-config-file)
     (let ((working-directory (psalm-get-working-dir)))
       (when working-directory
-        (cl-loop for name in '("psalm.neon" "psalm.neon.dist")
+        (cl-loop for name in '("psalm.xml" "psalm.xml.dist")
                  for dir  = (locate-dominating-file working-directory name)
                  if dir
                  return (expand-file-name name dir))))))
