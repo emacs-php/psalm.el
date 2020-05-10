@@ -1,23 +1,23 @@
-* phpstan.el
+* psalm.el
 #+BEGIN_HTML
-<a href="http://melpa.org/#/phpstan"><img alt="MELPA: phpstan" src="http://melpa.org/packages/phpstan-badge.svg"></a>
-<a href="http://stable.melpa.org/#/phpstan"><img alt="MELPA stable: phpstan" src="http://stable.melpa.org/packages/phpstan-badge.svg"></a>
+<a href="http://melpa.org/#/psalm"><img alt="MELPA: psalm" src="http://melpa.org/packages/psalm-badge.svg"></a>
+<a href="http://stable.melpa.org/#/psalm"><img alt="MELPA stable: psalm" src="http://stable.melpa.org/packages/psalm-badge.svg"></a>
 #+END_HTML
-Emacs interface to [[https://github.com/phpstan/phpstan][PHPStan]], includes checker for [[http://www.flycheck.org/en/latest/][Flycheck]].
+Emacs interface to [[https://psalm.dev/][Psalm]], includes checker for [[http://www.flycheck.org/en/latest/][Flycheck]].
 ** Support version
 - Emacs 24+
-- PHPStan latest/dev-master (NOT support 0.9 seriese)
+- Psalm latest/dev-master (NOT support 0.9 seriese)
 - PHP 7.1+ or Docker runtime
 ** How to install
 *** Install from MELPA
  1. If you have not set up MELPA, see [[https://melpa.org/#/getting-started][Getting Started - MELPA]].
- 2. ~M-x package-install flycheck-phpstan~
+ 2. ~M-x package-install flycheck-psalm~
 ** How to use
 *** For Flycheck user
 #+BEGIN_SRC emacs-lisp
 (defun my-php-mode-setup ()
   "My PHP-mode hook."
-  (require 'flycheck-phpstan)
+  (require 'flycheck-psalm)
   (flycheck-mode t))
 
 (add-hook 'php-mode-hook 'my-php-mode-setup)
@@ -25,101 +25,101 @@ Emacs interface to [[https://github.com/phpstan/phpstan][PHPStan]], includes che
 
 *** For Flymake user
 #+BEGIN_SRC emacs-lisp
-(add-hook 'php-mode-hook #'flymake-phpstan-turn-on)
+(add-hook 'php-mode-hook #'flymake-psalm-turn-on)
 #+END_SRC
 
-*** Using Docker (phpstan/docker-image)
-Install [[https://www.docker.com/get-started][Docker]] and [[https://hub.docker.com/r/phpstan/phpstan][phpstan/phpstan image]].
+*** Using Docker
+Install [[https://www.docker.com/get-started][Docker]].  There is currently no official Docker image we can trust, so if you want to use it, you are at your own risk.
 
-If you always use Docker for PHPStan, add the following into your ~.emacs~ file (~~/.emacs.d/init.el~)
+If you always use Docker for Psalm, add the following into your ~.emacs~ file (~~/.emacs.d/init.el~)
 #+BEGIN_SRC emacs-lisp
-(setq-default phpstan-executable 'docker)
+;; Be sure to replace it with a Docker image you trust
+(setq-default psalm-docker-image "your/dockerhub-image")
+(setq-default psalm-executable 'docker)
 #+END_SRC
 
 Put the following into ~.dir-locals.el~ files on the root directory of project.
 #+BEGIN_SRC emacs-lisp
 ((nil . ((php-project-root . git)
-         (phpstan-executable . docker)
-         (phpstan-working-dir . (root . "path/to/dir"))
-         (phpstan-config-file . (root . "path/to/dir/phpstan-docker.neon"))
-         (phpstan-level . 7))))
+         (psalm-executable . docker)
+         (psalm-working-dir . (root . "path/to/dir"))
+         (psalm-config-file . (root . "path/to/dir/psalm-docker.neon"))
+         (psalm-level . 7))))
 #+END_SRC
 
 *** Using composer (project specific)
-If your project Composer relies on phpstan, you do not need to set anything.
+If your project Composer relies on psalm, you do not need to set anything.
 #+BEGIN_SRC emacs-lisp
 ((nil . ((php-project-root . git)
-         (phpstan-executable . docker)
-         (phpstan-working-dir . (root . "path/to/dir"))
-         (phpstan-config-file . (root . "path/to/dir/phpstan-docker.neon"))
-         (phpstan-level . 7))))
+         (psalm-executable . docker)
+         (psalm-working-dir . (root . "path/to/dir"))
+         (psalm-config-file . (root . "path/to/dir/psalm-docker.neon"))
+         (psalm-level . 7))))
 #+END_SRC
 
 *** Using Composer
-Please install [[https://packagist.org/packages/phpstan/phpstan][phpstan/phpstan]] package for each user environment or project by using [[https://getcomposer.org/download/][Composer]].
+Please install [[https://packagist.org/packages/vimeo/psalm][vimeo/psalm]] package for each user environment or project by using [[https://getcomposer.org/download/][Composer]].
 
 If you are unfamiliar with resolving dependencies, the following shell commands are recommended.
 #+BEGIN_SRC shell
-$ composer global require phpstan/phpstan
+$ composer global require vimeo/psalm
 #+END_SRC
 
-*NOTICE*: [[https://packagist.org/packages/phpstan/phpstan-shim][phpstan/phpstan-shim]] is deprecated.  Please read [[https://medium.com/@ondrejmirtes/phpstan-0-12-released-f1a88036535d][PHPStan 0.12 Released!]].
-
 *** Using PHAR archive
-*NOTICE*: ~phpstan.el~ requires PHPStan **0.10+**.  We *strongly* recommend using the latest PHPStan.
+*NOTICE*: We *strongly* recommend using the latest Psalm.
 
-Please download ~phpstan.phar~ from [[https://github.com/phpstan/phpstan/releases][Releases · phpstan/phpstan]].
+Please download ~psalm.phar~ from [[https://github.com/vimeo/psalm/releases][Releases · vimeo/psalm]].
 ** Settings
-Variables for phpstan are mainly controlled by [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html][directory variables]] (~.dir-locals.el~).
+Variables for psalm are mainly controlled by [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html][directory variables]] (~.dir-locals.el~).
 
 Frequently ~(root. "path/to/file")~ notation appears in these variables.  It is relative to the top level directory of the project.  In general, the directory containing one of ~.projectile~, ~composer.json~, ~.git~ file (or directory) is at the top level.
 
-Please be aware that the root directory of the PHP project may *NOT* match either of PHPStan's ~%rootDir%~ and/or ~%currentWorkingDirectory%~.
+Please be aware that the root directory of the PHP project may *NOT* match either of Psalm's ~%rootDir%~ and/or ~%currentWorkingDirectory%~.
 
 Typically, you would set the following ~.dir-locals.el~.
 
 #+BEGIN_SRC emacs-lisp
 ((nil . ((php-project-root . auto)
-         (phpstan-executable . docker)
-         (phpstan-working-dir . (root . "path/to/dir/"))
-         (phpstan-config-file . (root . "path/to/dir/phpstan-custom.neon"))
-         (phpstan-level . max))))
+         (psalm-executable . docker)
+         (psalm-working-dir . (root . "path/to/dir/"))
+         (psalm-config-file . (root . "path/to/dir/psalm-custom.neon"))
+         (psalm-level . max))))
 #+END_SRC
 
-If there is a ~phpstan.neon~ file in the root directory of the project, you do not need to set both ~phpstan-working-dir~ and ~phpstan-config-file~.
+If there is a ~psalm.neon~ file in the root directory of the project, you do not need to set both ~psalm-working-dir~ and ~psalm-config-file~.
 
 ** API
 Most variables defined in this package are buffer local.  If you want to set it for multiple projects, use [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Default-Value.html][setq-default]].
 
-*** Local variable ~phpstan-working-dir~
-Path to working directory of PHPStan.
+*** Local variable ~psalm-working-dir~
+Path to working directory of Psalm.
 
-- STRING :: Absolute path to `phpstan' working directory.
-            - ex) ~"/path/to/phpstan.phar"~
-- ~(root . STRING)~ :: Relative path to `phpstan' working directory from project root directory.
+- STRING :: Absolute path to `psalm' working directory.
+            - ex) ~"/path/to/psalm.phar"~
+- ~(root . STRING)~ :: Relative path to `psalm' working directory from project root directory.
             - ex) ~(root . "path/to/dir")~
 - ~nil~ :: Use ~(php-project-get-root-dir)~ as working directory.
 
-*** Local variable ~phpstan-config-file~
-Path to project specific configuration file of PHPStan.
+*** Local variable ~psalm-config-file~
+Path to project specific configuration file of Psalm.
 
-- STRING :: Absolute path to ~phpstan~ configuration file.
-- ~(root . STRING)~ :: Relative path to ~phpstan~ configuration file from project root directory.
-- NIL :: Search ~phpstan.neon(.dist)~ in ~(phpstan-get-working-dir)~.
+- STRING :: Absolute path to ~psalm~ configuration file.
+- ~(root . STRING)~ :: Relative path to ~psalm~ configuration file from project root directory.
+- NIL :: Search ~psalm.neon(.dist)~ in ~(psalm-get-working-dir)~.
 
-*** Local variable ~phpstan-level~
-Rule level of PHPStan analysis.  Please see [[https://github.com/phpstan/phpstan/blob/master/README.md#rule-levels][README #Rule levels of PHPStan]].
+*** Local variable ~psalm-level~
+Rule level of Psalm analysis.  Please see [[https://github.com/vimeo/psalm/blob/master/README.md#rule-levels][README #Rule levels of Psalm]].
 ~0~ is the loosest and you can also use ~max~ as an alias for the highest level.  Default level is ~0~.
 
-*** Local variable ~phpstan-executable~
-- STRING :: Absolute path to `phpstan' executable file.
-            - ex) ~"/path/to/phpstan.phar"~
-- SYMBOL ~docker~ ::  Use Docker using phpstan/docker-image.
-- ~(root . STRING)~ ::  Relative path to `phpstan' executable file from project root directory.
-     - ex) ~(root . "script/phpstan")~
+*** Local variable ~psalm-executable~
+- STRING :: Absolute path to `psalm' executable file.
+            - ex) ~"/path/to/psalm.phar"~
+- SYMBOL ~docker~ ::  Use Docker using psalm/docker-image.
+- ~(root . STRING)~ ::  Relative path to `psalm' executable file from project root directory.
+     - ex) ~(root . "script/psalm")~
 - ~(STRING . (ARGUMENTS ...))~ :: Command name and arguments.
      - ex) ~("docker" "run" "--rm" "-v" "/path/to/project-dir/:/app" "your/docker-image")~
-- ~nil~ :: Auto detect ~phpstan~ executable file by composer dependencies of the project or executable command in ~PATH~ environment variable.
+- ~nil~ :: Auto detect ~psalm~ executable file by composer dependencies of the project or executable command in ~PATH~ environment variable.
 
-*** Custom variable ~phpstan-flycheck-auto-set-executable~
-Set flycheck phpstan-executable automatically when non-NIL.
+*** Custom variable ~psalm-flycheck-auto-set-executable~
+Set flycheck psalm-executable automatically when non-NIL.
