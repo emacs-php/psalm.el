@@ -107,10 +107,6 @@ Path to project specific configuration file of Psalm.
 - ~(root . STRING)~ :: Relative path to ~psalm~ configuration file from project root directory.
 - NIL :: Search ~psalm.neon(.dist)~ in ~(psalm-get-working-dir)~.
 
-*** Local variable ~psalm-level~
-Rule level of Psalm analysis.  Please see [[https://github.com/vimeo/psalm/blob/master/README.md#rule-levels][README #Rule levels of Psalm]].
-~0~ is the loosest and you can also use ~max~ as an alias for the highest level.  Default level is ~0~.
-
 *** Local variable ~psalm-executable~
 - STRING :: Absolute path to `psalm' executable file.
             - ex) ~"/path/to/psalm.phar"~
