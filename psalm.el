@@ -3,8 +3,8 @@
 ;; Copyright (C) 2020  Friends of Emacs-PHP development
 
 ;; Author: USAMI Kenta <tadsan@zonu.me>
-;; Created: 15 Mar 2018
-;; Version: 0.5.0
+;; Created: 31 Mar 2020
+;; Version: 0.6.0
 ;; Keywords: tools, php
 ;; Homepage: https://github.com/emacs-php/psalm.el
 ;; Package-Requires: ((emacs "24.3") (php-mode "1.22.3"))

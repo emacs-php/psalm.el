@@ -1,4 +1,4 @@
-(package "psalm" "0.5.0" "Interface to Psalm (PHP static analyzer)")
+(package "psalm" "0.6.0" "Interface to Psalm (PHP static analyzer)")
 (source "melpa" "https://melpa.org/packages/")
 
 (package-file "psalm.el")
