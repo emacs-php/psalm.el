@@ -1,4 +1,4 @@
-;;; flymake-phpstan.el --- Flymake backend for PHP using PHPStan  -*- lexical-binding: t; -*-
+;;; flymake-psalm.el --- Flymake backend for PHP using Psalm  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Friends of Emacs-PHP development
 
@@ -6,8 +6,8 @@
 ;; Created: 31 Mar 2020
 ;; Version: 0.5.0
 ;; Keywords: tools, php
-;; Homepage: https://github.com/emacs-php/phpstan.el
-;; Package-Requires: ((emacs "26.1") (phpstan "0.5.0"))
+;; Homepage: https://github.com/emacs-php/psalm.el
+;; Package-Requires: ((emacs "26.1") (psalm "0.5.0"))
 ;; License: GPL-3.0-or-later
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -25,11 +25,11 @@
 
 ;;; Commentary:
 
-;; Flymake backend for PHP using PHPStan (PHP Static Analysis Tool).
+;; Flymake backend for PHP using Psalm (PHP Static Analysis Tool).
 ;;
 ;; Put the following into your .emacs file (~/.emacs.d/init.el)
 ;;
-;;     (add-hook 'php-mode-hook #'flymake-phpstan-turn-on)
+;;     (add-hook 'php-mode-hook #'flymake-psalm-turn-on)
 ;;
 ;; For Lisp maintainers: see [GNU Flymake manual - 2.2.2 An annotated example backend]
 ;; https://www.gnu.org/software/emacs/manual/html_node/flymake/An-annotated-example-backend.html
@@ -37,35 +37,35 @@
 ;;; Code:
 (require 'php-project)
 (require 'flymake)
-(require 'phpstan)
+(require 'psalm)
 (eval-when-compile
   (require 'pcase))
 
-(defgroup flymake-phpstan nil
-  "Flymake backend for PHP using PHPStan."
+(defgroup flymake-psalm nil
+  "Flymake backend for PHP using Psalm."
   :group 'flymake
-  :group 'phpstan)
+  :group 'psalm)
 
-(defcustom flymake-phpstan-disable-c-mode-hooks t
+(defcustom flymake-psalm-disable-c-mode-hooks t
   "When T, disable `flymake-diagnostic-functions' for `c-mode'."
   :type 'boolean
-  :group 'flymake-phpstan)
+  :group 'flymake-psalm)
 
-(defvar-local flymake-phpstan--proc nil)
+(defvar-local flymake-psalm--proc nil)
 
-(defun flymake-phpstan-make-process (root command-args report-fn source)
-  "Make PHPStan process by ROOT, COMMAND-ARGS, REPORT-FN and SOURCE."
+(defun flymake-psalm-make-process (root command-args report-fn source)
+  "Make Psalm process by ROOT, COMMAND-ARGS, REPORT-FN and SOURCE."
   (let ((default-directory root))
     (make-process
-     :name "flymake-phpstan" :noquery t :connection-type 'pipe
-     :buffer (generate-new-buffer " *Flymake-PHPStan*")
+     :name "flymake-psalm" :noquery t :connection-type 'pipe
+     :buffer (generate-new-buffer " *Flymake-Psalm*")
      :command command-args
      :sentinel
      (lambda (proc _event)
        (pcase (process-status proc)
          (`exit
           (unwind-protect
-              (when (with-current-buffer source (eq proc flymake-phpstan--proc))
+              (when (with-current-buffer source (eq proc flymake-psalm--proc))
                 (with-current-buffer (process-buffer proc)
                   (goto-char (point-min))
                   (cl-loop
@@ -85,32 +85,32 @@
                    finally (funcall report-fn diags)))
                 (flymake-log :warning "Canceling obsolete check %s" proc))
             (kill-buffer (process-buffer proc))))
-         (code (user-error "PHPStan error (exit status: %s)" code)))))))
+         (code (user-error "Psalm error (exit status: %s)" code)))))))
 
-(defun flymake-phpstan (report-fn &rest _ignored-args)
-  "Flymake backend for PHPStan report using REPORT-FN."
-  (let ((command-args (phpstan-get-command-args)))
+(defun flymake-psalm (report-fn &rest _ignored-args)
+  "Flymake backend for Psalm report using REPORT-FN."
+  (let ((command-args (psalm-get-command-args)))
     (unless (car command-args)
-      (user-error "Cannot find a phpstan executable command"))
-    (when (process-live-p flymake-phpstan--proc)
-      (kill-process flymake-phpstan--proc))
+      (user-error "Cannot find a psalm executable command"))
+    (when (process-live-p flymake-psalm--proc)
+      (kill-process flymake-psalm--proc))
     (let ((source (current-buffer)))
       (save-restriction
         (widen)
-        (setq flymake-phpstan--proc (flymake-phpstan-make-process (php-project-get-root-dir) command-args report-fn source))
-        (process-send-region flymake-phpstan--proc (point-min) (point-max))
-        (process-send-eof flymake-phpstan--proc)))))
+        (setq flymake-psalm--proc (flymake-psalm-make-process (php-project-get-root-dir) command-args report-fn source))
+        (process-send-region flymake-psalm--proc (point-min) (point-max))
+        (process-send-eof flymake-psalm--proc)))))
 
 ;;;###autoload
-(defun flymake-phpstan-turn-on ()
-  "Enable `flymake-phpstan' as buffer-local Flymake backend."
+(defun flymake-psalm-turn-on ()
+  "Enable `flymake-psalm' as buffer-local Flymake backend."
   (interactive)
-  (let ((enabled (phpstan-enabled)))
+  (let ((enabled (psalm-enabled)))
     (when enabled
       (flymake-mode 1)
-      (when flymake-phpstan-disable-c-mode-hooks
+      (when flymake-psalm-disable-c-mode-hooks
         (remove-hook 'flymake-diagnostic-functions #'flymake-cc t))
-      (add-hook 'flymake-diagnostic-functions #'flymake-phpstan nil t))))
+      (add-hook 'flymake-diagnostic-functions #'flymake-psalm nil t))))
 
-(provide 'flymake-phpstan)
-;;; flymake-phpstan.el ends here
+(provide 'flymake-psalm)
+;;; flymake-psalm.el ends here

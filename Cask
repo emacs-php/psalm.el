@@ -1,8 +1,8 @@
-(package "phpstan" "0.5.0" "Interface to PHPStan (PHP static analyzer)")
+(package "psalm" "0.5.0" "Interface to Psalm (PHP static analyzer)")
 (source "melpa" "https://melpa.org/packages/")
 
-(package-file "phpstan.el")
-(package-file "flycheck-phpstan.el")
-(package-file "flymake-phpstan.el")
+(package-file "psalm.el")
+(package-file "flycheck-psalm.el")
+(package-file "flymake-psalm.el")
 (development
  (depends-on "php-mode"))

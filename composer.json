@@ -1,11 +1,8 @@
 {
-    "name": "emacs-php/phpstan.el",
-    "description": "Emacs interface to PHPStan",
+    "name": "emacs-php/psalm.el",
+    "description": "Emacs interface to Psalm",
     "license": "GPL-3.0-or-later",
     "require": {
-        "phpstan/phpstan-shim": "^0.10.2"
-    },
-    "require-dev": {
-        "phpstan/phpstan": "^0.10.2"
+        "vimeo/psalm": "^3.11"
     }
 }

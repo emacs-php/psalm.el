@@ -1,4 +1,4 @@
-;;; phpstan.el --- Interface to PHPStan              -*- lexical-binding: t; -*-
+;;; psalm.el --- Interface to Psalm              -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Friends of Emacs-PHP development
 
@@ -6,7 +6,7 @@
 ;; Created: 15 Mar 2018
 ;; Version: 0.5.0
 ;; Keywords: tools, php
-;; Homepage: https://github.com/emacs-php/phpstan.el
+;; Homepage: https://github.com/emacs-php/psalm.el
 ;; Package-Requires: ((emacs "24.3") (php-mode "1.22.3"))
 ;; License: GPL-3.0-or-later
 
@@ -25,16 +25,16 @@
 
 ;;; Commentary:
 
-;; Static analyze for PHP code using PHPStan.
-;; https://github.com/phpstan/phpstan
+;; Static analyze for PHP code using Psalm.
+;; https://psalm.dev/
 ;;
 ;; ## Instalation
 ;;
-;; You need to get either the local PHP runtime or Docker and prepare for PHPStan.
+;; You need to get either the local PHP runtime or Docker and prepare for Psalm.
 ;; Please read the README for these details.
-;; https://github.com/emacs-php/phpstan.el/blob/master/README.org
+;; https://github.com/emacs-php/psalm.el/blob/master/README.org
 ;;
-;; If you are a Flycheck user, install `flycheck-phpstan' package.
+;; If you are a Flycheck user, install `flycheck-psalm' package.
 ;;
 ;; ## Directory local variables
 ;;
@@ -42,10 +42,10 @@
 ;; Each variable can read what is documented by `M-x describe-variables'.
 ;;
 ;;     ((nil . ((php-project-root . git)
-;;              (phpstan-executable . docker)
-;;              (phpstan-working-dir . (root . "path/to/dir"))
-;;              (phpstan-config-file . (root . "path/to/dir/phpstan-docker.neon"))
-;;              (phpstan-level . 7))))
+;;              (psalm-executable . docker)
+;;              (psalm-working-dir . (root . "path/to/dir"))
+;;              (psalm-config-file . (root . "path/to/dir/psalm-docker.neon"))
+;;              (psalm-level . 7))))
 ;;
 ;; If you want to know the directory variable specification, please refer to
 ;; M-x info [Emacs > Customization > Variables] or the following web page.
@@ -58,97 +58,97 @@
 
 ;; Variables:
 
-(defgroup phpstan nil
-  "Interaface to PHPStan"
-  :tag "PHPStan"
-  :prefix "phpstan-"
+(defgroup psalm nil
+  "Interaface to Psalm"
+  :tag "Psalm"
+  :prefix "psalm-"
   :group 'tools
   :group 'php
-  :link '(url-link :tag "PHPStan" "https://github.com/phpstan/phpstan")
-  :link '(url-link :tag "phpstan.el" "https://github.com/emacs-php/phpstan.el"))
+  :link '(url-link :tag "Psalm" "https://github.com/psalm/psalm")
+  :link '(url-link :tag "psalm.el" "https://github.com/emacs-php/psalm.el"))
 
-(defcustom phpstan-flycheck-auto-set-executable t
-  "Set flycheck phpstan-executable automatically."
+(defcustom psalm-flycheck-auto-set-executable t
+  "Set flycheck psalm-executable automatically."
   :type 'boolean
-  :group 'phpstan)
+  :group 'psalm)
 
-(defcustom phpstan-enable-on-no-config-file t
-  "If T, activate configuration from composer even when `phpstan.neon' is not found."
+(defcustom psalm-enable-on-no-config-file t
+  "If T, activate configuration from composer even when `psalm.neon' is not found."
   :type 'boolean
-  :group 'phpstan)
+  :group 'psalm)
 
 ;;;###autoload
 (progn
-  (defvar phpstan-working-dir nil
-    "Path to working directory of PHPStan.
+  (defvar psalm-working-dir nil
+    "Path to working directory of Psalm.
 
 *NOTICE*: This is different from the project root.
 
 STRING
-     Absolute path to `phpstan' working directory.
+     Absolute path to `psalm' working directory.
 
 `(root . STRING)'
-     Relative path to `phpstan' working directory from project root directory.
+     Relative path to `psalm' working directory from project root directory.
 
 NIL
      Use (php-project-get-root-dir) as working directory.")
-  (make-variable-buffer-local 'phpstan-working-dir)
-  (put 'phpstan-working-dir 'safe-local-variable
+  (make-variable-buffer-local 'psalm-working-dir)
+  (put 'psalm-working-dir 'safe-local-variable
        #'(lambda (v) (if (consp v)
                          (and (eq 'root (car v)) (stringp (cdr v)))
                        (null v) (stringp v)))))
 
 ;;;###autoload
 (progn
-  (defvar phpstan-config-file nil
-    "Path to project specific configuration file of PHPStan.
+  (defvar psalm-config-file nil
+    "Path to project specific configuration file of Psalm.
 
 STRING
-     Absolute path to `phpstan' configuration file.
+     Absolute path to `psalm' configuration file.
 
 `(root . STRING)'
-     Relative path to `phpstan' configuration file from project root directory.
+     Relative path to `psalm' configuration file from project root directory.
 
 NIL
-     Search phpstan.neon(.dist) in (phpstan-get-working-dir).")
-  (make-variable-buffer-local 'phpstan-config-file)
-  (put 'phpstan-config-file 'safe-local-variable
+     Search psalm.neon(.dist) in (psalm-get-working-dir).")
+  (make-variable-buffer-local 'psalm-config-file)
+  (put 'psalm-config-file 'safe-local-variable
        #'(lambda (v) (if (consp v)
                          (and (eq 'root (car v)) (stringp (cdr v)))
                        (null v) (stringp v)))))
 
 ;;;###autoload
 (progn
-  (defvar-local phpstan-autoload-file nil
-    "Path to autoload file for PHPStan.
+  (defvar-local psalm-autoload-file nil
+    "Path to autoload file for Psalm.
 
 STRING
-     Path to `phpstan' autoload file.
+     Path to `psalm' autoload file.
 
 `(root . STRING)'
-     Relative path to `phpstan' configuration file from project root directory.
+     Relative path to `psalm' configuration file from project root directory.
 
 NIL
-     If `phpstan-enable-on-no-config-file', search \"vendor/autoload.php\" in (phpstan-get-working-dir).")
-  (put 'phpstan-autoload-file 'safe-local-variable
+     If `psalm-enable-on-no-config-file', search \"vendor/autoload.php\" in (psalm-get-working-dir).")
+  (put 'psalm-autoload-file 'safe-local-variable
        #'(lambda (v) (if (consp v)
                          (and (eq 'root (car v)) (stringp (cdr v)))
                        (null v) (stringp v)))))
 
 ;;;###autoload
 (progn
-  (defvar-local phpstan-level nil
-    "Rule level of PHPStan.
+  (defvar-local psalm-level nil
+    "Rule level of Psalm.
 
 INTEGER or STRING
-     Number of PHPStan rule level.
+     Number of Psalm rule level.
 
 max
-     The highest of PHPStan rule level.
+     The highest of Psalm rule level.
 
 NIL
-     Use rule level specified in `phpstan' configuration file.")
-  (put 'phpstan-level 'safe-local-variable
+     Use rule level specified in `psalm' configuration file.")
+  (put 'psalm-level 'safe-local-variable
        #'(lambda (v) (or (null v)
                          (integerp v)
                          (eq 'max v)
@@ -158,91 +158,91 @@ NIL
 
 ;;;###autoload
 (progn
-  (defvar phpstan-replace-path-prefix)
-  (make-variable-buffer-local 'phpstan-replace-path-prefix)
-  (put 'phpstan-replace-path-prefix 'safe-local-variable
+  (defvar psalm-replace-path-prefix)
+  (make-variable-buffer-local 'psalm-replace-path-prefix)
+  (put 'psalm-replace-path-prefix 'safe-local-variable
        #'(lambda (v) (or (null v) (stringp v)))))
 
-(defconst phpstan-docker-executable "docker")
+(defconst psalm-docker-executable "docker")
 
 ;;;###autoload
 (progn
-  (defvar phpstan-executable nil
-    "PHPStan excutable file.
+  (defvar psalm-executable nil
+    "Psalm excutable file.
 
 STRING
-     Absolute path to `phpstan' executable file.
+     Absolute path to `psalm' executable file.
 
 `docker'
-     Use Docker using phpstan/docker-image.
+     Use Docker using psalm/docker-image.
 
 `(root . STRING)'
-     Relative path to `phpstan' executable file.
+     Relative path to `psalm' executable file.
 
 `(STRING . (ARGUMENTS ...))'
      Command name and arguments.
 
 NIL
-     Auto detect `phpstan' executable file.")
-  (make-variable-buffer-local 'phpstan-executable)
-  (put 'phpstan-executable 'safe-local-variable
+     Auto detect `psalm' executable file.")
+  (make-variable-buffer-local 'psalm-executable)
+  (put 'psalm-executable 'safe-local-variable
        #'(lambda (v) (if (consp v)
                          (or (and (eq 'root (car v)) (stringp (cdr v)))
                              (and (stringp (car v)) (listp (cdr v))))
                        (or (eq 'docker v) (null v) (stringp v))))))
 
 ;; Functions:
-(defun phpstan-get-working-dir ()
-  "Return path to working directory of PHPStan."
+(defun psalm-get-working-dir ()
+  "Return path to working directory of Psalm."
   (cond
-   ((and phpstan-working-dir (consp phpstan-working-dir) (eq 'root (car phpstan-working-dir)))
-    (expand-file-name (cdr phpstan-working-dir) (php-project-get-root-dir)))
-   ((stringp phpstan-working-dir) phpstan-working-dir)
+   ((and psalm-working-dir (consp psalm-working-dir) (eq 'root (car psalm-working-dir)))
+    (expand-file-name (cdr psalm-working-dir) (php-project-get-root-dir)))
+   ((stringp psalm-working-dir) psalm-working-dir)
    (t (php-project-get-root-dir))))
 
-(defun phpstan-enabled ()
-  "Return non-NIL if PHPStan configured or Composer detected."
+(defun psalm-enabled ()
+  "Return non-NIL if Psalm configured or Composer detected."
   (and (not (file-remote-p default-directory)) ;; Not support remote filesystem
-       (or (phpstan-get-config-file)
-           (phpstan-get-autoload-file)
-           (and phpstan-enable-on-no-config-file
+       (or (psalm-get-config-file)
+           (psalm-get-autoload-file)
+           (and psalm-enable-on-no-config-file
                 (php-project-get-root-dir)))))
 
-(defun phpstan-get-config-file ()
-  "Return path to phpstan configure file or `NIL'."
-  (if phpstan-config-file
-      (if (and (consp phpstan-config-file)
-               (eq 'root (car phpstan-config-file)))
-          ;; Use (php-project-get-root-dir), not phpstan-working-dir.
-          (expand-file-name (cdr phpstan-config-file) (php-project-get-root-dir))
-        phpstan-config-file)
-    (let ((working-directory (phpstan-get-working-dir)))
+(defun psalm-get-config-file ()
+  "Return path to psalm configure file or `NIL'."
+  (if psalm-config-file
+      (if (and (consp psalm-config-file)
+               (eq 'root (car psalm-config-file)))
+          ;; Use (php-project-get-root-dir), not psalm-working-dir.
+          (expand-file-name (cdr psalm-config-file) (php-project-get-root-dir))
+        psalm-config-file)
+    (let ((working-directory (psalm-get-working-dir)))
       (when working-directory
-        (cl-loop for name in '("phpstan.neon" "phpstan.neon.dist")
+        (cl-loop for name in '("psalm.neon" "psalm.neon.dist")
                  for dir  = (locate-dominating-file working-directory name)
                  if dir
                  return (expand-file-name name dir))))))
 
-(defun phpstan-get-autoload-file ()
+(defun psalm-get-autoload-file ()
   "Return path to autoload file or NIL."
-  (when phpstan-autoload-file
-    (if (and (consp phpstan-autoload-file)
-             (eq 'root (car phpstan-autoload-file)))
-        (expand-file-name (cdr phpstan-autoload-file) (php-project-get-root-dir))
-      phpstan-autoload-file)))
+  (when psalm-autoload-file
+    (if (and (consp psalm-autoload-file)
+             (eq 'root (car psalm-autoload-file)))
+        (expand-file-name (cdr psalm-autoload-file) (php-project-get-root-dir))
+      psalm-autoload-file)))
 
-(defun phpstan-normalize-path (source-original &optional source)
+(defun psalm-normalize-path (source-original &optional source)
   "Return normalized source file path to pass by `SOURCE-ORIGINAL' OR `SOURCE'.
 
-If neither `phpstan-replace-path-prefix' nor executable docker is set,
+If neither `psalm-replace-path-prefix' nor executable docker is set,
 it returns the value of `SOURCE' as it is."
   (let ((root-directory (expand-file-name (php-project-get-root-dir)))
         (prefix
-         (or phpstan-replace-path-prefix
+         (or psalm-replace-path-prefix
              (cond
-              ((eq 'docker phpstan-executable) "/app")
-              ((and (consp phpstan-executable)
-                    (string= "docker" (car phpstan-executable))) "/app")))))
+              ((eq 'docker psalm-executable) "/app")
+              ((and (consp psalm-executable)
+                    (string= "docker" (car psalm-executable))) "/app")))))
     (if prefix
         (expand-file-name
          (replace-regexp-in-string (concat "\\`" (regexp-quote root-directory))
@@ -251,46 +251,46 @@ it returns the value of `SOURCE' as it is."
          prefix)
       (or source source-original))))
 
-(defun phpstan-get-level ()
-  "Return path to phpstan configure file or `NIL'."
+(defun psalm-get-level ()
+  "Return path to psalm configure file or `NIL'."
   (cond
-   ((null phpstan-level) nil)
-   ((integerp phpstan-level) (int-to-string phpstan-level))
-   ((symbolp phpstan-level) (symbol-name phpstan-level))
-   (t phpstan-level)))
+   ((null psalm-level) nil)
+   ((integerp psalm-level) (int-to-string psalm-level))
+   ((symbolp psalm-level) (symbol-name psalm-level))
+   (t psalm-level)))
 
-(defun phpstan-get-executable ()
-  "Return PHPStan excutable file and arguments."
+(defun psalm-get-executable ()
+  "Return Psalm excutable file and arguments."
   (cond
-   ((eq 'docker phpstan-executable)
+   ((eq 'docker psalm-executable)
     (list "run" "--rm" "-v"
           (concat (expand-file-name (php-project-get-root-dir)) ":/app")
-          "phpstan/phpstan"))
-   ((and (consp phpstan-executable)
-         (eq 'root (car phpstan-executable)))
+          "psalm/psalm"))
+   ((and (consp psalm-executable)
+         (eq 'root (car psalm-executable)))
     (list
-     (expand-file-name (cdr phpstan-executable) (php-project-get-root-dir))))
-   ((and (stringp phpstan-executable) (file-exists-p phpstan-executable))
-    (list phpstan-executable))
-   ((and phpstan-flycheck-auto-set-executable
-         (listp phpstan-executable)
-         (stringp (car phpstan-executable))
-         (listp (cdr phpstan-executable)))
-    (cdr phpstan-executable))
-   ((null phpstan-executable)
-    (let ((vendor-phpstan (expand-file-name "vendor/bin/phpstan"
+     (expand-file-name (cdr psalm-executable) (php-project-get-root-dir))))
+   ((and (stringp psalm-executable) (file-exists-p psalm-executable))
+    (list psalm-executable))
+   ((and psalm-flycheck-auto-set-executable
+         (listp psalm-executable)
+         (stringp (car psalm-executable))
+         (listp (cdr psalm-executable)))
+    (cdr psalm-executable))
+   ((null psalm-executable)
+    (let ((vendor-psalm (expand-file-name "vendor/bin/psalm"
                                             (php-project-get-root-dir))))
       (cond
-       ((file-exists-p vendor-phpstan) (list vendor-phpstan))
-       ((executable-find "phpstan") (list (executable-find "phpstan")))
-       (t (error "PHPStan executable not found")))))))
+       ((file-exists-p vendor-psalm) (list vendor-psalm))
+       ((executable-find "psalm") (list (executable-find "psalm")))
+       (t (error "Psalm executable not found")))))))
 
-(defun phpstan-get-command-args ()
-  "Return command line argument for PHPStan."
-  (let ((executable (phpstan-get-executable))
-        (path (phpstan-normalize-path (phpstan-get-config-file)))
-        (autoload (phpstan-get-autoload-file))
-        (level (phpstan-get-level)))
+(defun psalm-get-command-args ()
+  "Return command line argument for Psalm."
+  (let ((executable (psalm-get-executable))
+        (path (psalm-normalize-path (psalm-get-config-file)))
+        (autoload (psalm-get-autoload-file))
+        (level (psalm-get-level)))
     (append executable
             (list "analyze" "--error-format=raw" "--no-progress" "--no-interaction")
             (and path (list "-c" path))
@@ -298,5 +298,5 @@ it returns the value of `SOURCE' as it is."
             (and level (list "-l" level))
             (list "--"))))
 
-(provide 'phpstan)
-;;; phpstan.el ends here
+(provide 'psalm)
+;;; psalm.el ends here

@@ -1,4 +1,4 @@
-;;; flycheck-phpstan.el --- Flycheck integration for PHPStan  -*- lexical-binding: t; -*-
+;;; flycheck-psalm.el --- Flycheck integration for Psalm  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Friends of Emacs-PHP development
 
@@ -6,8 +6,8 @@
 ;; Created: 15 Mar 2018
 ;; Version: 0.5.0
 ;; Keywords: tools, php
-;; Homepage: https://github.com/emacs-php/phpstan.el
-;; Package-Requires: ((emacs "24.3") (flycheck "26") (phpstan "0.5.0"))
+;; Homepage: https://github.com/emacs-php/psalm.el
+;; Package-Requires: ((emacs "24.3") (flycheck "26") (psalm "0.5.0"))
 ;; License: GPL-3.0-or-later
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -25,13 +25,13 @@
 
 ;;; Commentary:
 
-;; Flycheck integration for PHPStan.
+;; Flycheck integration for Psalm.
 ;;
 ;; Put the following into your .emacs file (~/.emacs.d/init.el)
 ;;
 ;;     (defun my-php-mode-setup ()
 ;;       "My PHP-mode hook."
-;;       (require 'flycheck-phpstan)
+;;       (require 'flycheck-psalm)
 ;;       (flycheck-mode t))
 ;;
 ;;     (add-hook 'php-mode-hook 'my-php-mode-setup)
@@ -39,41 +39,41 @@
 
 ;;; Code:
 (require 'flycheck)
-(require 'phpstan)
+(require 'psalm)
 
 ;; Usually it is defined dynamically by flycheck
-(defvar flycheck-phpstan-executable)
+(defvar flycheck-psalm-executable)
 
-(defun flycheck-phpstan--enabled-and-set-variable ()
-  "Return path to phpstan configure file, and set buffer execute in side effect."
-  (let ((enabled (phpstan-enabled)))
+(defun flycheck-psalm--enabled-and-set-variable ()
+  "Return path to psalm configure file, and set buffer execute in side effect."
+  (let ((enabled (psalm-enabled)))
     (prog1 enabled
-      (when (and phpstan-flycheck-auto-set-executable
-                 (not (and (boundp 'flycheck-phpstan-executable)
-                           (symbol-value 'flycheck-phpstan-executable)))
-                 (or (eq 'docker phpstan-executable)
-                     (and (consp phpstan-executable)
-                          (stringp (car phpstan-executable))
-                          (listp (cdr phpstan-executable)))))
-        (set (make-local-variable 'flycheck-phpstan-executable)
-             (if (eq 'docker phpstan-executable)
-                 phpstan-docker-executable
-               (car phpstan-executable)))))))
+      (when (and psalm-flycheck-auto-set-executable
+                 (not (and (boundp 'flycheck-psalm-executable)
+                           (symbol-value 'flycheck-psalm-executable)))
+                 (or (eq 'docker psalm-executable)
+                     (and (consp psalm-executable)
+                          (stringp (car psalm-executable))
+                          (listp (cdr psalm-executable)))))
+        (set (make-local-variable 'flycheck-psalm-executable)
+             (if (eq 'docker psalm-executable)
+                 psalm-docker-executable
+               (car psalm-executable)))))))
 
-(flycheck-define-checker phpstan
-  "PHP static analyzer based on PHPStan."
-  :command ("php" (eval (phpstan-get-command-args))
-            (eval (phpstan-normalize-path
+(flycheck-define-checker psalm
+  "PHP static analyzer based on Psalm."
+  :command ("php" (eval (psalm-get-command-args))
+            (eval (psalm-normalize-path
                    (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)
                    (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))))
-  :working-directory (lambda (_) (phpstan-get-working-dir))
-  :enabled (lambda () (flycheck-phpstan--enabled-and-set-variable))
+  :working-directory (lambda (_) (psalm-get-working-dir))
+  :enabled (lambda () (flycheck-psalm--enabled-and-set-variable))
   :error-patterns
   ((error line-start (1+ (not (any ":"))) ":" line ":" (message) line-end))
   :modes (php-mode phps-mode))
 
-(add-to-list 'flycheck-checkers 'phpstan t)
-(flycheck-add-next-checker 'php 'phpstan)
+(add-to-list 'flycheck-checkers 'psalm t)
+(flycheck-add-next-checker 'php 'psalm)
 
-(provide 'flycheck-phpstan)
-;;; flycheck-phpstan.el ends here
+(provide 'flycheck-psalm)
+;;; flycheck-psalm.el ends here
