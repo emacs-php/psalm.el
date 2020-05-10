@@ -1,0 +1,8 @@
+{
+    "autoload": {
+        "files": ["bootstrap.php"]
+    },
+    "require": {
+        "php": "^7.4"
+    }
+}

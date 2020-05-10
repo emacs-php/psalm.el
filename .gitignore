@@ -1,5 +1,5 @@
 *.elc
 /*-autoloads.el
 /.cask
-/composer.lock
-/vendor
+composer.lock
+vendor
