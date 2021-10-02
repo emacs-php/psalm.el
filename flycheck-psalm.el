@@ -65,7 +65,7 @@
   :command ("php" (eval (psalm-get-command-args))
             (eval (psalm-normalize-path
                    (flycheck-save-buffer-to-temp #'flycheck-temp-file-inplace)
-                   (flycheck-save-buffer-to-temp #'flycheck-temp-file-system))))
+                   (buffer-file-name))))
   :working-directory (lambda (_) (psalm-get-working-dir))
   :enabled (lambda () (flycheck-psalm--enabled-and-set-variable))
   :error-patterns
