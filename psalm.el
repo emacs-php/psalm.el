@@ -76,6 +76,13 @@
   :type 'boolean
   :group 'psalm)
 
+(defcustom psalm-show-info t
+  "If non-NIL, add `--show-info=true' option to command line argument."
+  :type 'boolean
+  :local t
+  :safe #'booleanp
+  :group 'psalm)
+
 (defcustom psalm-docker-image nil
   "Docker image name for execute Psalm command."
   :type '(choice
@@ -244,6 +251,7 @@ it returns the value of `SOURCE' as it is."
         (path (psalm-normalize-path (psalm-get-config-file))))
     (append executable
             (list "--no-progress" "--output-format=emacs")
+            (when psalm-show-info (list "--show-info=true"))
             (and path (list "-c" path))
             (list "--"))))
 

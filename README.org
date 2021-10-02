@@ -119,3 +119,5 @@ Path to project specific configuration file of Psalm.
 
 *** Custom variable ~psalm-flycheck-auto-set-executable~
 Set flycheck psalm-executable automatically when non-NIL.
+*** Custom variable (local) ~psalm-show-info~
+If non-NIL, add ~--show-info=true~ option to command line argument.  This variable can be overridden locally.
