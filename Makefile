@@ -9,7 +9,7 @@ install:
 compile:
 	$(EASK) compile
 
-ci clean autoloads install compile
+ci: clean autoloads install compile
 
 all: clean autoloads compile
 
