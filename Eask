@@ -6,6 +6,7 @@
 (keywords "tools" "php")
 
 (package-file "psalm.el")
+(files "*.el")
 
 (script "test" "echo \"Error: no test specified\" && exit 1")
 
