@@ -1,34 +1,22 @@
 EMACS ?= emacs
 CASK ?= cask
-ELS = psalm.el flycheck-psalm.el flymake-psalm.el
-AUTOLOADS = psalm-autoloads.el
-ELCS = $(ELS:.el=.elc)
+EASK ?= eask
 
-.el.elc: .cask
-	$(EMACS) -Q -batch -L . --eval \
-	"(let ((default-directory (expand-file-name \".cask\" default-directory))) \
-	   (require 'package) \
-	   (normal-top-level-add-subdirs-to-load-path))" \
-	-f package-initialize -f batch-byte-compile $<
+install:
+	$(EASK) package
+	$(EASK) install
 
-.cask: Cask
-	$(CASK)
+compile:
+	$(EASK) compile
 
-all: clean autoloads $(ELCS)
+ci clean autoloads install compile
 
-autoloads: $(AUTOLOADS)
+all: clean autoloads compile
 
-$(AUTOLOADS): $(ELCS)
-	$(EMACS) -Q -batch -L . --eval \
-	"(progn \
-	   (require 'package) \
-	   (normal-top-level-add-subdirs-to-load-path) \
-	   (package-generate-autoloads \"psalm\" default-directory))"
+autoloads:
+	$(EASK) generate autoloads
 
 clean:
-	-rm -f $(ELCS) $(AUTOLOADS)
+	$(EASK) clean all
 
-clobber: clean
-	-rm -f .cask
-
-.PHONY: all autoloads clean clobber
+.PHONY: all autoloads clean
