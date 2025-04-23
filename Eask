@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "psalm"
          "0.6.0"
          "Interface to Psalm")
